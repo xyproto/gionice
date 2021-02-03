@@ -1,3 +1,0 @@
-# github.com/jessevdk/go-flags v1.4.0
-## explicit
-github.com/jessevdk/go-flags
