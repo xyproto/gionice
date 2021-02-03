@@ -1,5 +1,7 @@
-# gion
+# ionice
 
-A port of Ion (an ionice fork) to Go
+Port of ionice (from util-linux, GPL2 licensed) to a Go module.
 
-# WORK IN PROGRESS!
+Includes the `gionice` utility.
+
+# THIS IS A WORK IN PROGRESS!
