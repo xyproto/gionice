@@ -8,39 +8,46 @@ import (
 	"os"
 	"syscall"
 
+	"github.com/akamensky/argparse"
 	"github.com/xyproto/ionice"
 )
 
+const versionString = "gionice 1.0.0"
+
+const usageString = `Usage:
+ gionice [options] -p <pid>...
+ gionice [options] -P <pgid>...
+ gionice [options] -u <uid>...
+ gionice [options] <command>
+
+Show or change the I/O-scheduling class and priority of a process.
+
+Options:
+ -c, --class <class>    name or number of scheduling class,
+                          0: none, 1: realtime, 2: best-effort, 3: idle
+ -n, --classdata <num>  priority (0..7) in the specified scheduling class,
+                          only for the realtime and best-effort classes
+ -p, --pid <pid>...     act on these already running processes
+ -P, --pgid <pgrp>...   act on already running processes in these groups
+ -t, --ignore           ignore failures
+ -u, --uid <uid>...     act on already running processes owned by these users
+
+ -h, --help             display this help
+ -V, --version          display version
+
+For more details see gionice(1).`
+
 func usage() {
-	fmt.Println()
-	fmt.Println("Usage:")
-	fmt.Println(" gionice [options] -p <pid>...")
-	fmt.Println(" gionice [options] -P <pgid>...")
-	fmt.Println(" gionice [options] -u <uid>...")
-	fmt.Println(" gionice [options] <command>")
-	fmt.Println()
-	fmt.Println("Show or change the I/O-scheduling class and priority of a process.")
-	fmt.Println()
-	fmt.Println("Options:")
-	fmt.Println(" -c, --class <class>    name or number of scheduling class,")
-	fmt.Println("                          0: none, 1: realtime, 2: best-effort, 3: idle")
-	fmt.Println(" -n, --classdata <num>  priority (0..7) in the specified scheduling class,")
-	fmt.Println("                          only for the realtime and best-effort classes")
-	fmt.Println(" -p, --pid <pid>...     act on these already running processes")
-	fmt.Println(" -P, --pgid <pgrp>...   act on already running processes in these groups")
-	fmt.Println(" -t, --ignore           ignore failures")
-	fmt.Println(" -u, --uid <uid>...     act on already running processes owned by these users")
-	fmt.Println()
-	fmt.Printf("%-24s%s\n", " -h, --help", "display this help")
-	fmt.Printf("%-24s%s\n", " -V, --version", "display version")
+	fmt.Println(usageString)
 	os.Exit(0)
 }
 
-func main() {
+func oldmain() {
+	usage()
 	var (
 		data = 4
 		//set         = 0
-		ioclass = gion.IOPRIO_CLASS_BE
+		ioclass = ionice.IOPRIO_CLASS_BE
 		//c           = 0
 		//which       = 0
 		//who         = 0
@@ -113,7 +120,7 @@ func main() {
 		           tolerant = true;
 		           break;
 		       case 'V':
-		           printf("%s %s\n", "gionice", "1.0.0");
+		           fmt.Println(versionString);
 		           exit(EXIT_SUCCESS);
 		       case 'h':
 		           usage();
@@ -180,7 +187,7 @@ func main() {
 	tolerant := false
 
 	// ion [-c CLASS] COMMAND
-	gion.SetIDPri(0, ioclass, data, gion.IOPRIO_WHO_PROCESS, tolerant)
+	ionice.SetIDPri(0, ioclass, data, ionice.IOPRIO_WHO_PROCESS, tolerant)
 
 	var argv0 string = "/usr/bin/ls"
 	var argv []string = []string{"/usr/bin/ls"}
@@ -196,5 +203,14 @@ func main() {
 	//const EX_EXEC_ENOENT = 127 // Could not find program to exec
 	//log.Fatalf("failed to execute %s", commandString)
 	//err(errno == ENOENT ? EX_EXEC_ENOENT : EX_EXEC_FAILED, "failed to execute %s", argv[optind]);
+}
 
+func main() {
+	parser := argparse.NewParser("print", "Prints provided string to stdout")
+	s := parser.String("s", "string", &argparse.Options{Required: true, Help: "String to print"})
+	err := parser.Parse(os.Args)
+	if err != nil {
+		fmt.Print(parser.Usage(err))
+	}
+	fmt.Println(*s)
 }
