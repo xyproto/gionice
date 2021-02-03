@@ -61,114 +61,119 @@ func main() {
 	//defer close_stdout();
 
 	/*
-	   while ((c = getopt_long(argc, argv, "+n:c:p:P:u:tVh", longopts, NULL)) != EOF)
-	       switch (c) {
-	       case 'n':
-	           data = strtos32_or_err(optarg, "invalid class data argument");
-	           set |= 1;
-	           break;
-	       case 'c':
-	           if (isdigit(*optarg))
-	               ioclass = strtos32_or_err(optarg,
-	                   "invalid class argument");
-	           else {
-	               ioclass = parse_ioclass(optarg);
-	               if (ioclass < 0)
-	                   errx(EXIT_FAILURE,
-	                       "unknown scheduling class: '%s'",
-	                       optarg);
-	           }
-	           set |= 2;
-	           break;
-	       case 'p':
-	           if (who)
-	               errx(EXIT_FAILURE,
-	                   "can handle only one of pid, pgid or uid at once");
-	           invalid_msg = "invalid PID argument";
-	           which = strtos32_or_err(optarg, invalid_msg);
-	           who = IOPRIO_WHO_PROCESS;
-	           break;
-	       case 'P':
-	           if (who)
-	               errx(EXIT_FAILURE,
-	                   "can handle only one of pid, pgid or uid at once");
-	           invalid_msg = "invalid PGID argument";
-	           which = strtos32_or_err(optarg, invalid_msg);
-	           who = IOPRIO_WHO_PGRP;
-	           break;
-	       case 'u':
-	           if (who)
-	               errx(EXIT_FAILURE,
-	                   "can handle only one of pid, pgid or uid at once");
-	           invalid_msg = "invalid UID argument";
-	           which = strtos32_or_err(optarg, invalid_msg);
-	           who = IOPRIO_WHO_USER;
-	           break;
-	       case 't':
-	           tolerant = true;
-	           break;
-	       case 'V':
-	           printf("%s %s\n", "ion", "1.0.0");
-	           exit(EXIT_SUCCESS);
-	       case 'h':
-	           usage();
-	       default:
-	           fprintf(stderr, "Try '%s --help' for more information.\n", "ion");
-	           exit(EXIT_FAILURE);
-	       }
-	   switch (ioclass) {
-	   case IOPRIO_CLASS_NONE:
-	       if ((set & 1) && !tolerant) {
-	           warnx("ignoring given class data for none class");
-	       }
-	       data = 0;
-	       break;
-	   case IOPRIO_CLASS_RT:
-	   case IOPRIO_CLASS_BE:
-	       break;
-	   case IOPRIO_CLASS_IDLE:
-	       if ((set & 1) && !tolerant) {
-	           warnx("ignoring given class data for idle class");
-	       }
-	       data = 7;
-	       break;
-	   default:
-	       if (!tolerant) {
-	           warnx("unknown prio class %d", ioclass);
-	       }
-	       break;
-	   }
-	   if (!set && !which && optind == argc) {
-	        // ion without options, print the current ioprio
-	       ioprio_print(0, IOPRIO_WHO_PROCESS);
-	   } else if (!set && who) {
-	        // ion -p|-P|-u ID [ID ...]
-	       ioprio_print(which, who);
-	       while argv[optind] != 0 {
-	           which = strtos32_or_err(argv[optind], invalid_msg)
-	           ioprio_print(which, who)
-	       	optind++
-	       }
-	   } else if (set && who) {
-	        // ion -c CLASS -p|-P|-u ID [ID ...]
-	       ioprio_setid(which, ioclass, data, who);
-	       while argv[optind] != 0 {
-	           which = strtos32_or_err(argv[optind], invalid_msg);
-	           ioprio_setid(which, ioclass, data, who);
-	           optind++
-	       }
-	   } else if (argv[optind]) {
-	        // ion [-c CLASS] COMMAND
-	       ioprio_setid(0, ioclass, data, IOPRIO_WHO_PROCESS);
-	       execvp(argv[optind], &argv[optind]);
-	       static int EX_EXEC_FAILED = 126; // Program located, but not usable
-	       static int EX_EXEC_ENOENT = 127; // Could not find program to exec
-	       err(errno == ENOENT ? EX_EXEC_ENOENT : EX_EXEC_FAILED, "failed to execute %s", argv[optind]);
+		   while ((c = getopt_long(argc, argv, "+n:c:p:P:u:tVh", longopts, NULL)) != EOF)
+		       switch (c) {
+		       case 'n':
+		       	// convert string to int32 or fail
+		           data = strtos32_or_err(optarg, "invalid class data argument");
+		           set |= 1;
+		           break;
+		       case 'c':
+		           if (isdigit(*optarg)) {
+						// convert string to int32 or fail
+		               ioclass = strtos32_or_err(optarg,
+		                   "invalid class argument");
+		           } else {
+		               ioclass = parse_ioclass(optarg);
+		               if (ioclass < 0)
+		                   errx(EXIT_FAILURE,
+		                       "unknown scheduling class: '%s'",
+		                       optarg);
+		           }
+		           set |= 2;
+		           break;
+		       case 'p':
+		           if (who)
+		               errx(EXIT_FAILURE,
+		                   "can handle only one of pid, pgid or uid at once");
+		           invalid_msg = "invalid PID argument";
+				   // convert string to int32 or fail
+		           which = strtos32_or_err(optarg, invalid_msg);
+		           who = IOPRIO_WHO_PROCESS;
+		           break;
+		       case 'P':
+		           if (who)
+		               errx(EXIT_FAILURE,
+		                   "can handle only one of pid, pgid or uid at once");
+		           invalid_msg = "invalid PGID argument";
+		           which = strtos32_or_err(optarg, invalid_msg);
+		           who = IOPRIO_WHO_PGRP;
+		           break;
+		       case 'u':
+		           if (who)
+		               errx(EXIT_FAILURE,
+		                   "can handle only one of pid, pgid or uid at once");
+		           invalid_msg = "invalid UID argument";
+		           which = strtos32_or_err(optarg, invalid_msg);
+		           who = IOPRIO_WHO_USER;
+		           break;
+		       case 't':
+		           tolerant = true;
+		           break;
+		       case 'V':
+		           printf("%s %s\n", "ionice", "1.0.0");
+		           exit(EXIT_SUCCESS);
+		       case 'h':
+		           usage();
+		       default:
+		           fprintf(stderr, "Try '%s --help' for more information.\n", "ionice");
+		           exit(EXIT_FAILURE);
+		       }
+		   switch (ioclass) {
+		   case IOPRIO_CLASS_NONE:
+		       if ((set & 1) && !tolerant) {
+		           warnx("ignoring given class data for none class");
+		       }
+		       data = 0;
+		       break;
+		   case IOPRIO_CLASS_RT:
+		   case IOPRIO_CLASS_BE:
+		       break;
+		   case IOPRIO_CLASS_IDLE:
+		       if ((set & 1) && !tolerant) {
+		           warnx("ignoring given class data for idle class");
+		       }
+		       data = 7;
+		       break;
+		   default:
+		       if (!tolerant) {
+		           warnx("unknown prio class %d", ioclass);
+		       }
+		       break;
+		   }
+		   if (!set && !which && optind == argc) {
+		        // ionice without options, print the current ioprio
+		       ioprio_print(0, IOPRIO_WHO_PROCESS);
+		   } else if (!set && who) {
+		        // ionice -p|-P|-u ID [ID ...]
+		       ioprio_print(which, who);
+		       while argv[optind] != 0 {
+		           which = strtos32_or_err(argv[optind], invalid_msg)
+		           ioprio_print(which, who)
+		       	optind++
+		       }
+		   } else if (set && who) {
+		        // ionice -c CLASS -p|-P|-u ID [ID ...]
+		       ioprio_setid(which, ioclass, data, who);
+		       while argv[optind] != 0 {
+		           which = strtos32_or_err(argv[optind], invalid_msg);
+		           ioprio_setid(which, ioclass, data, who);
+		           optind++
+		       }
+		   } else if (argv[optind]) {
+		        // ionice [-c CLASS] COMMAND
+		       ioprio_setid(0, ioclass, data, IOPRIO_WHO_PROCESS);
+		       execvp(argv[optind], &argv[optind]);
+		       static int EX_EXEC_FAILED = 126; // Program located, but not usable
+		       static int EX_EXEC_ENOENT = 127; // Could not find program to exec
+		       err(errno == ENOENT ? EX_EXEC_ENOENT : EX_EXEC_FAILED, "failed to execute %s", argv[optind]);
 
-	   } else {
-	       warnx("bad usage");
-	       log.Fatalln("Try 'ion --help' for more information.")
-	   }*/
+		   } else {
+		       warnx("bad usage");
+		       log.Fatalln("Try 'ionice --help' for more information.")
+		   }*/
+
+	// experimental code follows:
 
 	tolerant := false
 
