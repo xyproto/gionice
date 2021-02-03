@@ -271,9 +271,9 @@ func main() {
 	case opts.Help:
 		fmt.Println(usageString)
 		os.Exit(0)
-	default:
-		fmt.Fprintf(os.Stderr, "Try 'gionice --help' for more information.\n")
-		os.Exit(1)
+	//default:
+		//fmt.Fprintf(os.Stderr, "Try 'gionice --help' for more information.\n")
+		//os.Exit(1)
 	}
 	switch ioclass {
 	case ionice.IOPRIO_CLASS_NONE:
