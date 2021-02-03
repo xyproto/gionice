@@ -4,114 +4,18 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 	"syscall"
+
+	"github.com/xyproto/gion"
 )
-
-var tolerant bool
-
-func ioprio_set(which, who int, ioprio uint) (uint, error) {
-	r1, r2, errNo := syscall.Syscall(syscall.SYS_IOPRIO_SET, uintptr(which), uintptr(who), uintptr(ioprio))
-	fmt.Println("FROM SYSCALL (a):", r1)
-	fmt.Println("FROM SYSCALL (b):", r2)
-	fmt.Println("FROM SYSCALL (err):", errNo)
-	var err error
-	if errNo != 0 {
-		err = errNo
-	}
-	// TODO: r1 or r2?
-	return uint(r1), err
-}
-
-func ioprio_get(which, who int) (uint, error) {
-	r1, r2, errNo := syscall.Syscall(syscall.SYS_IOPRIO_GET, uintptr(which), uintptr(who), uintptr(0))
-	fmt.Println("FROM SYSCALL (a):", r1)
-	fmt.Println("FROM SYSCALL (b):", r2)
-	fmt.Println("FROM SYSCALL (err):", errNo)
-	var err error
-	if errNo != 0 {
-		err = errNo
-	}
-	// TODO: r1 or r2?
-	return uint(r1), err
-}
-
-const (
-	IOPRIO_CLASS_NONE = 0
-	IOPRIO_CLASS_RT   = 1
-	IOPRIO_CLASS_BE   = 2
-	IOPRIO_CLASS_IDLE = 3
-
-	IOPRIO_WHO_PROCESS = 1
-	IOPRIO_WHO_PGRP    = 2
-	IOPRIO_WHO_USER    = 3
-
-	IOPRIO_CLASS_SHIFT = 13
-)
-
-func IOPRIO_PRIO_MASK() uint {
-	return (uint(1) << IOPRIO_CLASS_SHIFT) - 1
-}
-
-func IOPRIO_PRIO_CLASS(mask uint) uint {
-	return mask >> IOPRIO_CLASS_SHIFT
-}
-
-func IOPRIO_PRIO_DATA(mask uint) uint {
-	return mask & IOPRIO_PRIO_MASK()
-}
-
-func IOPRIO_PRIO_VALUE(classn, data uint) uint {
-	return ((classn << IOPRIO_CLASS_SHIFT) | data)
-}
-
-var to_prio map[int]string = map[int]string{
-	IOPRIO_CLASS_NONE: "none",
-	IOPRIO_CLASS_RT:   "realtime",
-	IOPRIO_CLASS_BE:   "best-effort",
-	IOPRIO_CLASS_IDLE: "idle",
-}
-
-func parse_ioclass(str string) int {
-	for i := 0; i < len(to_prio); i++ {
-		if strings.ToLower(str) == strings.ToLower(to_prio[i]) {
-			return i
-		}
-	}
-	return -1
-}
-
-func ioprio_print(pid, who int) {
-	ioprio, err := ioprio_get(who, pid)
-	if err != nil {
-		log.Fatalln("ioprio_get failed", err)
-	}
-	ioclass := IOPRIO_PRIO_CLASS(ioprio)
-	name := "unknown"
-	if ioclass >= 0 && ioclass < uint(len(to_prio)) {
-		name = to_prio[int(ioclass)]
-	}
-	if ioclass != IOPRIO_CLASS_IDLE {
-		fmt.Printf("%s: prio %d\n", name, IOPRIO_PRIO_DATA(ioprio))
-	} else {
-		fmt.Printf("%s\n", name)
-	}
-}
-
-func ioprio_setid(which, ioclass, data, who int) {
-	_, err := ioprio_set(who, which, IOPRIO_PRIO_VALUE(uint(ioclass), uint(data)))
-	if err != nil && !tolerant {
-		log.Fatalln("ioprio_set failed", err)
-	}
-}
 
 func usage() {
 	fmt.Println()
 	fmt.Println("Usage:")
-	fmt.Println(" ion [options] -p <pid>...")
-	fmt.Println(" ion [options] -P <pgid>...")
-	fmt.Println(" ion [options] -u <uid>...")
-	fmt.Println(" ion [options] <command>")
+	fmt.Println(" ionice [options] -p <pid>...")
+	fmt.Println(" ionice [options] -P <pgid>...")
+	fmt.Println(" ionice [options] -u <uid>...")
+	fmt.Println(" ionice [options] <command>")
 	fmt.Println()
 	fmt.Println("Show or change the I/O-scheduling class and priority of a process.")
 	fmt.Println()
@@ -134,7 +38,7 @@ func main() {
 	var (
 		data = 4
 		//set         = 0
-		ioclass = IOPRIO_CLASS_BE
+		ioclass = gion.IOPRIO_CLASS_BE
 		//c           = 0
 		//which       = 0
 		//who         = 0
@@ -266,8 +170,10 @@ func main() {
 	       log.Fatalln("Try 'ion --help' for more information.")
 	   }*/
 
+	tolerant := false
+
 	// ion [-c CLASS] COMMAND
-	ioprio_setid(0, ioclass, data, IOPRIO_WHO_PROCESS)
+	gion.SetIDPri(0, ioclass, data, gion.IOPRIO_WHO_PROCESS, tolerant)
 
 	var argv0 string = "/usr/bin/ls"
 	var argv []string = []string{"/usr/bin/ls"}
