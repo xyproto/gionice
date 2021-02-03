@@ -1,5 +1,5 @@
-// Package gion contains code that has been ported from util-linux/ionice (GPL2 licensed)
-package gion
+// Package ionice contains code that has been ported from util-linux/ionice (GPL2 licensed)
+package ionice
 
 import (
 	"fmt"

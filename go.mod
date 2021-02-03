@@ -1,3 +1,3 @@
-module github.com/xyproto/gion
+module github.com/xyproto/ionice
 
 go 1.15
