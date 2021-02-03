@@ -13,7 +13,7 @@ import (
 	"github.com/xyproto/ionice"
 )
 
-const versionString = "gionice 1.0.0"
+const versionString = "gionice 0.9.0"
 
 const usageString = `Usage:
  gionice [options] -p <pid>...

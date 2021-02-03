@@ -12,6 +12,6 @@ Even though this code is based on solid and well tested C code, the current impl
 
 ## General info
 
-* Version: 1.0.0
+* Version: 0.9.0
 * License: GPL2
 * Author: Alexander F. Rødseth &lt;xyproto@archlinux.org&gt;
