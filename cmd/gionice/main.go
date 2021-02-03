@@ -13,20 +13,6 @@ import (
 	"github.com/xyproto/ionice"
 )
 
-type Options struct {
-	Class     string `short:"c" long:"class" description:"name or number of scheduling class, 0: none, 1: realtime, 2: best-effort, 3: idle" choice:"0" choice:"1" choice:"2" choice:"3" choice:"none" choice:"realtime" choice:"best-effort" choice:"idle"`
-	ClassData int    `short:"n" long:"classdata" description:"priority (0..7) in the specified scheduling class, only for the realtime and best-effort classes" choice:"0" choice:"1" choice:"2" choice:"3" choice:"4" choice:"5" choice:"6" choice:"7" choice:"8" choice:"9"`
-	PID       int    `short:"p" long:"pid" description:"act on these already running processes" value-name:"PID"`
-	PGID      int    `short:"P" long:"pgid" description:"act on already running processes in these groups" value-name:"PGID"`
-	Ignore    bool   `short:"t" long:"ignore" description:"ignore failures"`
-	UID       int    `short:"u" long:"uid" description:"act on already running processes owned by these users" value-name:"UID"`
-	Help      bool   `short:"h" long:"help" description:"display this help"`
-	Version   bool   `short:"V" long:"version" description:"display version"`
-	Args      struct {
-		Command []string
-	} //`positional-args:"yes" required:"yes"`
-}
-
 const versionString = "gionice 1.0.0"
 
 const usageString = `Usage:
@@ -51,6 +37,21 @@ Options:
  -V, --version          display version
 
 For more details see gionice(1).`
+
+// Options is a struct containing information about all flags used by gionice
+type Options struct {
+	Class     string `short:"c" long:"class" description:"name or number of scheduling class, 0: none, 1: realtime, 2: best-effort, 3: idle" choice:"0" choice:"1" choice:"2" choice:"3" choice:"none" choice:"realtime" choice:"best-effort" choice:"idle"`
+	ClassData int    `short:"n" long:"classdata" description:"priority (0..7) in the specified scheduling class, only for the realtime and best-effort classes" choice:"0" choice:"1" choice:"2" choice:"3" choice:"4" choice:"5" choice:"6" choice:"7" choice:"8" choice:"9"`
+	PID       int    `short:"p" long:"pid" description:"act on these already running processes" value-name:"PID"`
+	PGID      int    `short:"P" long:"pgid" description:"act on already running processes in these groups" value-name:"PGID"`
+	Ignore    bool   `short:"t" long:"ignore" description:"ignore failures"`
+	UID       int    `short:"u" long:"uid" description:"act on already running processes owned by these users" value-name:"UID"`
+	Help      bool   `short:"h" long:"help" description:"display this help"`
+	Version   bool   `short:"V" long:"version" description:"display version"`
+	Args      struct {
+		Command []string
+	} //`positional-args:"yes" required:"yes"`
+}
 
 func main() {
 	opts := &Options{}
@@ -172,9 +173,7 @@ func main() {
 			fmt.Fprintf(os.Stderr, "could not find %s in PATH\n", args[0])
 			os.Exit(1)
 		}
-		var argv = args
-		var envv []string = []string{}
-		err = syscall.Exec(argv0, argv, envv)
+		err = syscall.Exec(argv0, args, os.Environ())
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "failed to execute %s\n", argv0)
 			os.Exit(1)
