@@ -1,3 +1,5 @@
+// gionice is a port of ionice to Go
+
 package main
 
 import (
@@ -6,16 +8,16 @@ import (
 	"os"
 	"syscall"
 
-	"github.com/xyproto/gion"
+	"github.com/xyproto/ionice"
 )
 
 func usage() {
 	fmt.Println()
 	fmt.Println("Usage:")
-	fmt.Println(" ionice [options] -p <pid>...")
-	fmt.Println(" ionice [options] -P <pgid>...")
-	fmt.Println(" ionice [options] -u <uid>...")
-	fmt.Println(" ionice [options] <command>")
+	fmt.Println(" gionice [options] -p <pid>...")
+	fmt.Println(" gionice [options] -P <pgid>...")
+	fmt.Println(" gionice [options] -u <uid>...")
+	fmt.Println(" gionice [options] <command>")
 	fmt.Println()
 	fmt.Println("Show or change the I/O-scheduling class and priority of a process.")
 	fmt.Println()
@@ -111,12 +113,12 @@ func main() {
 		           tolerant = true;
 		           break;
 		       case 'V':
-		           printf("%s %s\n", "ionice", "1.0.0");
+		           printf("%s %s\n", "gionice", "1.0.0");
 		           exit(EXIT_SUCCESS);
 		       case 'h':
 		           usage();
 		       default:
-		           fprintf(stderr, "Try '%s --help' for more information.\n", "ionice");
+		           fprintf(stderr, "Try '%s --help' for more information.\n", "gionice");
 		           exit(EXIT_FAILURE);
 		       }
 		   switch (ioclass) {
@@ -142,10 +144,10 @@ func main() {
 		       break;
 		   }
 		   if (!set && !which && optind == argc) {
-		        // ionice without options, print the current ioprio
+		        // gionice without options, print the current ioprio
 		       ioprio_print(0, IOPRIO_WHO_PROCESS);
 		   } else if (!set && who) {
-		        // ionice -p|-P|-u ID [ID ...]
+		        // gionice -p|-P|-u ID [ID ...]
 		       ioprio_print(which, who);
 		       while argv[optind] != 0 {
 		           which = strtos32_or_err(argv[optind], invalid_msg)
@@ -153,7 +155,7 @@ func main() {
 		       	optind++
 		       }
 		   } else if (set && who) {
-		        // ionice -c CLASS -p|-P|-u ID [ID ...]
+		        // gionice -c CLASS -p|-P|-u ID [ID ...]
 		       ioprio_setid(which, ioclass, data, who);
 		       while argv[optind] != 0 {
 		           which = strtos32_or_err(argv[optind], invalid_msg);
@@ -161,7 +163,7 @@ func main() {
 		           optind++
 		       }
 		   } else if (argv[optind]) {
-		        // ionice [-c CLASS] COMMAND
+		        // gionice [-c CLASS] COMMAND
 		       ioprio_setid(0, ioclass, data, IOPRIO_WHO_PROCESS);
 		       execvp(argv[optind], &argv[optind]);
 		       static int EX_EXEC_FAILED = 126; // Program located, but not usable
@@ -170,7 +172,7 @@ func main() {
 
 		   } else {
 		       warnx("bad usage");
-		       log.Fatalln("Try 'ionice --help' for more information.")
+		       log.Fatalln("Try 'gionice --help' for more information.")
 		   }*/
 
 	// experimental code follows:
