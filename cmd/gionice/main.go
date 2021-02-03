@@ -8,7 +8,7 @@ import (
 	"os"
 	"syscall"
 
-	"github.com/akamensky/argparse"
+	"github.com/jessevdk/go-flags"
 	"github.com/xyproto/ionice"
 )
 
@@ -37,13 +37,7 @@ Options:
 
 For more details see gionice(1).`
 
-func usage() {
-	fmt.Println(usageString)
-	os.Exit(0)
-}
-
 func oldmain() {
-	usage()
 	var (
 		data = 4
 		//set         = 0
@@ -205,12 +199,37 @@ func oldmain() {
 	//err(errno == ENOENT ? EX_EXEC_ENOENT : EX_EXEC_FAILED, "failed to execute %s", argv[optind]);
 }
 
-func main() {
-	parser := argparse.NewParser("print", "Prints provided string to stdout")
-	s := parser.String("s", "string", &argparse.Options{Required: true, Help: "String to print"})
-	err := parser.Parse(os.Args)
-	if err != nil {
-		fmt.Print(parser.Usage(err))
+type Options struct {
+	Class     string `short:"c" long:"class" description:"name or number of scheduling class, 0: none, 1: realtime, 2: best-effort, 3: idle" choice:"0" choice:"1" choice:"2" choice:"3" choice:"none" choice:"realtime" choice:"best-effort" choice:"idle"`
+	ClassData int    `short:"n" long:"classdata" description:"priority (0..7) in the specified scheduling class, only for the realtime and best-effort classes" choice:"0" choice:"1" choice:"2" choice:"3" choice:"4" choice:"5" choice:"6" choice:"7" choice:"8" choice:"9"`
+	PID       int    `short:"p" long:"pid" description:"act on these already running processes" value-name:"PID"`
+	PGID      int    `short:"P" long:"pgid" description:"act on already running processes in these groups" value-name:"PGID"`
+	Ignore    bool   `short:"t" long:"ignore" description:"ignore failures"`
+	UID       int    `short:"u" long:"uid" description:"act on already running processes owned by these users" value-name:"UID"`
+	Help      bool   `short:"h" long:"help" description:"display this help"`
+	Version   bool   `short:"V" long:"version" description:"display version"`
+	Args      struct {
+		Command []string
 	}
-	fmt.Println(*s)
+}
+
+func main() {
+	var opts Options
+	p := flags.NewParser(&opts, flags.PassAfterNonOption|flags.PassDoubleDash)
+	args, err := p.Parse()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	if opts.Help {
+		fmt.Println(usageString)
+		return
+	}
+	if opts.Version {
+		fmt.Println(versionString)
+		return
+	}
+	fmt.Println("DOING SOMETHING")
+	fmt.Println("opts", opts)
+	fmt.Println("Remaining args", args)
 }
