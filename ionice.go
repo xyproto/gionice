@@ -21,6 +21,8 @@ const (
 	IOPRIO_CLASS_SHIFT = 13
 )
 
+type IOPRIO_CLASS int
+
 // SetPri sets the IO priority for the given which (process, pgrp or user) and who (the ID),
 // using the given io priority number.
 func SetPri(which, who int, ioprio uint) (uint, error) {
@@ -42,8 +44,6 @@ func Pri(which, who int) (uint, error) {
 	// TODO: r1 or r2?
 	return uint(r1), err
 }
-
-type IOPRIO_CLASS int
 
 func IOPRIO_PRIO_MASK() uint {
 	return (uint(1) << IOPRIO_CLASS_SHIFT) - 1
@@ -97,7 +97,7 @@ func Print(pid, who int) {
 	}
 }
 
-func SetIDPri(which, ioclass, data, who int, tolerant bool) {
+func SetIDPri(which int, ioclass IOPRIO_CLASS, data, who int, tolerant bool) {
 	_, err := SetPri(who, which, IOPRIO_PRIO_VALUE(uint(ioclass), uint(data)))
 	if err != nil && !tolerant {
 		log.Fatalln("ioprio_set failed", err)
