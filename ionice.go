@@ -8,11 +8,14 @@ import (
 	"syscall"
 )
 
+// PriClass represents an IO class, like "realtime" or "idle"
+type PriClass int
+
 const (
-	IOPRIO_CLASS_NONE = 0
-	IOPRIO_CLASS_RT   = 1
-	IOPRIO_CLASS_BE   = 2
-	IOPRIO_CLASS_IDLE = 3
+	IOPRIO_CLASS_NONE PriClass = 0
+	IOPRIO_CLASS_RT   PriClass = 1
+	IOPRIO_CLASS_BE   PriClass = 2
+	IOPRIO_CLASS_IDLE PriClass = 3
 
 	IOPRIO_WHO_PROCESS = 1
 	IOPRIO_WHO_PGRP    = 2
@@ -21,46 +24,43 @@ const (
 	IOPRIO_CLASS_SHIFT = 13
 )
 
-type IOPrioClass int
-
 // SetPri sets the IO priority for the given "which" (process, pgrp or user) and "who" (the ID),
 // using the given io priority number.
 func SetPri(which, who int, ioprio uint) (uint, error) {
 	r1, _, errNo := syscall.Syscall(syscall.SYS_IOPRIO_SET, uintptr(which), uintptr(who), uintptr(ioprio))
-	var err error
 	if errNo != 0 {
-		err = errNo
+		return uint(r1), errNo
 	}
-	return uint(r1), err
+	return uint(r1), nil
+
 }
 
 // Pri returns the IO priority for the given "which" (process, pgrp or user) and "who" (the ID).
 func Pri(which, who int) (uint, error) {
 	r1, _, errNo := syscall.Syscall(syscall.SYS_IOPRIO_GET, uintptr(which), uintptr(who), uintptr(0))
-	var err error
 	if errNo != 0 {
-		err = errNo
+		return uint(r1), errNo
 	}
-	return uint(r1), err
+	return uint(r1), nil
 }
 
-func IOPrioMask() uint {
+func priMask() uint {
 	return (uint(1) << IOPRIO_CLASS_SHIFT) - 1
 }
 
-func IOPrioPrioClass(mask uint) IOPrioClass {
-	return IOPrioClass(mask >> IOPRIO_CLASS_SHIFT)
+func priPriClass(mask uint) PriClass {
+	return PriClass(mask >> IOPRIO_CLASS_SHIFT)
 }
 
-func IOPrioData(mask uint) uint {
-	return mask & IOPrioMask()
+func priData(mask uint) uint {
+	return mask & priMask()
 }
 
-func IOPrioValue(classn, data uint) uint {
+func priValue(classn, data uint) uint {
 	return ((classn << IOPRIO_CLASS_SHIFT) | data)
 }
 
-var to_prio = map[IOPrioClass]string{
+var to_prio = map[PriClass]string{
 	IOPRIO_CLASS_NONE: "none",
 	IOPRIO_CLASS_RT:   "realtime",
 	IOPRIO_CLASS_BE:   "best-effort",
@@ -71,7 +71,7 @@ var to_prio = map[IOPrioClass]string{
 // "none", "realtime", best-effort" or "idle", to a corresponding IOPRIO_CLASS.
 // will also handle "0", "1", "2" or "3"
 // The parsing is case-insensitive, so "REALTIME" or "rEaLtImE" is also fine.
-func Parse(ioprio string) (IOPrioClass, error) {
+func Parse(ioprio string) (PriClass, error) {
 	switch strings.ToLower(ioprio) {
 	case "0", "none":
 		return IOPRIO_CLASS_NONE, nil
@@ -91,21 +91,21 @@ func Print(pid, who int) {
 	if err != nil {
 		log.Fatalln("ioprio_get failed", err)
 	}
-	ioclass := IOPrioPrioClass(ioprio)
+	ioclass := priPriClass(ioprio)
 	name := "unknown"
-	to_prio_len := IOPrioClass(len(to_prio))
+	to_prio_len := PriClass(len(to_prio))
 	if ioclass >= 0 && ioclass < to_prio_len {
 		name = to_prio[ioclass]
 	}
 	if ioclass != IOPRIO_CLASS_IDLE {
-		fmt.Printf("%s: prio %d\n", name, IOPrioData(ioprio))
+		fmt.Printf("%s: prio %d\n", name, priData(ioprio))
 	} else {
 		fmt.Printf("%s\n", name)
 	}
 }
 
-func SetIDPri(which int, ioclass IOPrioClass, data, who int, tolerant bool) {
-	_, err := SetPri(who, which, IOPrioValue(uint(ioclass), uint(data)))
+func SetIDPri(which int, ioclass PriClass, data, who int, tolerant bool) {
+	_, err := SetPri(who, which, priValue(uint(ioclass), uint(data)))
 	if err != nil && !tolerant {
 		log.Fatalln("ioprio_set failed", err)
 	}
