@@ -12,6 +12,6 @@ The `ionice`  package can be used by any Go program that wishes to run without h
 
 ## General info
 
-* Version: 0.9.1
+* Version: 1.0.0
 * License: GPL2
 * Author: Alexander F. Rødseth &lt;xyproto@archlinux.org&gt;
