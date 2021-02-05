@@ -112,11 +112,11 @@ func SetIDPri(which int, ioclass PriClass, data, who int) error {
 // If permitted, set the given process ID to "idle", level 7.
 // Use 0 for the current process.
 func SetIdle(pid int) error {
-	return SetIDPri(pid, ionice.IOPRIO_CLASS_IDLE, 7, ionice.IOPRIO_WHO_PROCESS)
+	return SetIDPri(pid, IOPRIO_CLASS_IDLE, 7, IOPRIO_WHO_PROCESS)
 }
 
 // If permitted, set the given process ID to "realtime", level 7.
 // Use 0 for the current process.
 func SetRealTime(pid int) error {
-	return SetIDPri(pid, ionice.IOPRIO_CLASS_RT, 7, ionice.IOPRIO_WHO_PROCESS)
+	return SetIDPri(pid, IOPRIO_CLASS_RT, 7, IOPRIO_WHO_PROCESS)
 }
