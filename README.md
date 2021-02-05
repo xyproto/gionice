@@ -39,6 +39,6 @@ By using `iotop` it's easy to check that the process PRIO is now `idle`.
 
 ## General info
 
-* Version: 1.0.0
+* Version: 1.1.0
 * License: GPL2
 * Author: Alexander F. Rødseth &lt;xyproto@archlinux.org&gt;
