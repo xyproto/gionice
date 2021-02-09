@@ -1,4 +1,4 @@
-module github.com/xyproto/ionice
+module github.com/xyproto/gionice
 
 go 1.15
 

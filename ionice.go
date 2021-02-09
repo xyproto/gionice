@@ -1,5 +1,5 @@
-// Package ionice contains code that has been ported from util-linux/ionice (GPL2 licensed)
-package ionice
+// Package gionice is a port of the core parts of util-linux/ionice (GPL2 licensed)
+package gionice
 
 import (
 	"fmt"

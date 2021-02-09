@@ -5,12 +5,12 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/xyproto/ionice"
+	"github.com/xyproto/gionice"
 )
 
 func main() {
-	// Make this process "idle" (level 7)
-	ionice.SetIdle(0)
+	// Make the current process "idle" (level 7)
+	gionice.SetIdle(0)
 
 	// Write to a file and delete then delete it, repeatedly
 	for {
