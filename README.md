@@ -2,9 +2,9 @@
 
 This is an port of the core parts of the `ionice` utility from `util-linux`, to a Go module.
 
-The command line utility [chill](https://github.com/xyproto/chill), which is a drop-in replacement for the `ionice` utility, uses this module.
+The command line utility [chill](https://github.com/xyproto/chill) (a drop-in replacement for `ionice`), uses this module.
 
-This package can be used by any Go program that wishes to run without hogging the I/O capabilities of the current system.
+This package can be used by any Go program that wishes to run without taking up the I/O capabilities of the current system.
 
 ## Example use
 
