@@ -1,6 +1,6 @@
 # gionice
 
-This is an port of the core parts of the `ionice` utility from `util-linux`, to a Go module.
+This is an port of the core parts of the `ionice` utility from `util-linux`, to a Go module, without using `cgo`.
 
 The command line utility [chill](https://github.com/xyproto/chill) (a drop-in replacement for `ionice`), uses this module.
 
