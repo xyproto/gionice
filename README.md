@@ -14,7 +14,6 @@ To make your own Go program run as "idle" and not hog the I/O capabilities of th
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 
