@@ -8,7 +8,7 @@ This package can be used by any Go program that wishes to run without taking up 
 
 ## Example use
 
-To make your own Go program run as "idle" and not hog the I/O capabilities of the system, simply call `ionice.SetIdle(0)`:
+To make your own Go program run as "idle" and not hog the I/O capabilities of the system, simply call `ionice.Idle()`:
 
 ```go
 package main
@@ -21,13 +21,13 @@ import (
 )
 
 func main() {
-	// Make the current process "idle" (level 7)
-	gionice.SetIdle(0)
+	// Make the current process group priority to be "idle" (level 7)
+	gionice.Idle()
 
 	// Generate I/O activity
 	for {
-		ioutil.WriteFile("frenetic.dat", []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, 0644)
-		os.Remove("frenetic.dat")
+		_ = ioutil.WriteFile("frenetic.dat", []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, 0644)
+		_ = os.Remove("frenetic.dat")
 	}
 }
 ```
