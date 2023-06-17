@@ -34,6 +34,8 @@ func main() {
 
 By using `iotop` it's easy to check that the process PRIO is now `idle`.
 
+See the `cmd/supernice` example for how to make a Go program have a lower priority both when it comes to I/O and CPU.
+
 ## General info
 
 * Version: 1.3.0
